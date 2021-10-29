@@ -20,7 +20,11 @@ public class Server {
             serverSocket = new ServerSocket(serverPort);
 
             while (!serverSocket.isClosed()) {
-
+                if (numConnect == 2) {
+                    Game game = new Game(sockets[0], sockets[1]);
+                    Thread thread = new Thread(game);
+                    thread.start();
+                }
                 System.out.println("Waiting for player...");
                 clientSocket = serverSocket.accept();
 
@@ -33,6 +37,7 @@ public class Server {
                     fullServer.println("Server is full. Please try later");
                     fullServer.flush();
                     clientSocket.close();
+                    numConnect++;
 
                 }
 
@@ -47,7 +52,8 @@ public class Server {
 
     public static void main(String[] args) {
 
-        Server server = new Server();
+        new Server();
+
 
     }
 
