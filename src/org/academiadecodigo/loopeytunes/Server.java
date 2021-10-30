@@ -12,6 +12,10 @@ public class Server {
     private Socket[] sockets = new Socket[2];
     private int numConnect = 0;
     private Socket clientSocket;
+    private String playerName;
+    private PrintWriter message;
+
+
 
     public Server() {
 
@@ -23,19 +27,21 @@ public class Server {
 
                 System.out.println("Waiting for player...");
                 clientSocket = serverSocket.accept();
+                System.out.println("Player " + playerName + " connected to game server!");
 
                 if (numConnect < 2) {
-
                     sockets[numConnect] = clientSocket;
+                    message = new PrintWriter(clientSocket.getOutputStream(), true);
+                    message.println(playerName + " connected to game server");
+                    message.flush();
                     numConnect++;
                 } else {
-                    PrintWriter fullServer = new PrintWriter(clientSocket.getOutputStream(), true);
-                    fullServer.println("Server is full. Please try later");
-                    fullServer.flush();
+                    message = new PrintWriter(clientSocket.getOutputStream(), true);
+                    message.println("Server is full. Please try again when the game is over :)");
+                    message.flush();
                     clientSocket.close();
 
                 }
-
             }
 
 
@@ -47,7 +53,7 @@ public class Server {
 
     public static void main(String[] args) {
 
-        Server server = new Server();
+        Server gameServer = new Server();
 
     }
 
