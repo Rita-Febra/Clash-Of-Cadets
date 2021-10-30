@@ -17,11 +17,12 @@ public class Game implements Runnable {
         for (int i = 0; i < ListQuestions.values().length; i++) {
 
             if (i % 2 == 0) {
-                questionsP1[i/2] = new Question(ListQuestions.values()[i]);
+                questionsP1[i / 2] = new Question(ListQuestions.values()[i]);
                 continue;
             }
-            questionsP2[(i-1)/2] = new Question(ListQuestions.values()[i]);
+            questionsP2[(i - 1) / 2] = new Question(ListQuestions.values()[i]);
         }
+
 
         player1 = new Player(playerSocket1, questionsP1);
         player2 = new Player(playerSocket2, questionsP2);
@@ -32,10 +33,20 @@ public class Game implements Runnable {
     @Override
     public void run() {
 
+
         threadPlayer1 = new Thread(player1);
         threadPlayer2 = new Thread(player2);
+
         threadPlayer1.start();
         threadPlayer2.start();
 
+
+        while(!(player2.getCompleteAnswers() && player1.getCompleteAnswers())){
+
+
+        }
+
+
+        }
     }
-}
+

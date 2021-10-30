@@ -19,8 +19,8 @@ public class Question {
         return options;
     }
 
-    public void setOptions(String[] options) {
-        this.options = options;
+    public void setOptions(String answer, int index) {
+        options[index] = answer;
     }
 
     public String getResponse() {

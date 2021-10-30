@@ -19,6 +19,7 @@ public class Server {
             System.out.println("Binding to port: " + serverPort);
             serverSocket = new ServerSocket(serverPort);
 
+
             while (!serverSocket.isClosed()) {
                 if (numConnect == 2) {
                     Game game = new Game(sockets[0], sockets[1]);
@@ -33,9 +34,9 @@ public class Server {
                     sockets[numConnect] = clientSocket;
                     numConnect++;
                 } else {
-                    PrintWriter fullServer = new PrintWriter(clientSocket.getOutputStream(), true);
-                    fullServer.println("Server is full. Please try later");
-                    fullServer.flush();
+                    PrintWriter serverMessage = new PrintWriter(clientSocket.getOutputStream(), true);
+                    serverMessage.println("Server is full. Please try later");
+                    serverMessage.flush();
                     clientSocket.close();
                     numConnect++;
 
