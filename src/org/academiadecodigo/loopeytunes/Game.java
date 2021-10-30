@@ -1,6 +1,8 @@
 package org.academiadecodigo.loopeytunes;
 
 
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.Socket;
 
 public class Game implements Runnable {
@@ -11,8 +13,15 @@ public class Game implements Runnable {
     private Player player2;
     private Thread threadPlayer1;
     private Thread threadPlayer2;
+    PrintWriter printWriter;
 
     public Game(Socket playerSocket1, Socket playerSocket2) {
+
+        try {
+            printWriter = new PrintWriter(playerSocket1.getOutputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         for (int i = 0; i < ListQuestions.values().length; i++) {
 
@@ -28,7 +37,6 @@ public class Game implements Runnable {
 
     }
 
-
     public void startThreads() {
         threadPlayer1 = new Thread(player1);
         threadPlayer2 = new Thread(player2);
@@ -38,12 +46,16 @@ public class Game implements Runnable {
 
     public void gameOver(){
         if (player1.getScore() == player2.getScore()) {
-            System.out.println("It's a tie");
+            printWriter.println("\n ## IT'S A TIE!");
+            printWriter.flush();
             return;
         }
-        Player winner = (player1.getScore() > player2.getScore() ? player1 : player2);
 
-        System.out.println(winner.getPlayerName());
+        Player winner = (player1.getScore() > player2.getScore() ? player1 : player2);
+        Player looser = (player1.getScore() < player2.getScore() ? player1 : player2);
+
+        winner.wins();
+        looser.loses();
 
     }
 
@@ -76,4 +88,5 @@ public class Game implements Runnable {
         gameOver();
 
     }
+
 }

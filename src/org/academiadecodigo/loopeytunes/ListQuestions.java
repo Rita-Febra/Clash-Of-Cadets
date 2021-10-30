@@ -3,14 +3,14 @@ package org.academiadecodigo.loopeytunes;
 public enum ListQuestions{
 
 
-    QUESTION_1 ("\nDe que cor é o ceu?\n", "Azul"),
-    QUESTION_2 ("\nQue horas são?\n", "14"),
-    QUESTION_3 ("\nEsta tudo bem?\n", "sempre"),
-    QUESTION_4 ("\nVais embora?\n", "daqui a bocado"),
-    QUESTION_5 ("\nQueres dormir?\n", "nao"),
-    QUESTION_6 ("\nVamos sair?\n","em dezembro"),
-    QUESTION_7 ("\nEs bebedo?\n","as vezes"),
-    QUESTION_8 ("\nPizza com abacaxi?\n","nunca");
+    QUESTION_1 ("\nDe que cor é o ceu?", "Azul"),
+    QUESTION_2 ("\nQue horas são?", "14"),
+    QUESTION_3 ("\nEsta tudo bem?", "sempre"),
+    QUESTION_4 ("\nVais embora?", "daqui a bocado"),
+    QUESTION_5 ("\nQueres dormir?", "nao"),
+    QUESTION_6 ("\nVamos sair?","em dezembro"),
+    QUESTION_7 ("\nEs bebedo?","as vezes"),
+    QUESTION_8 ("\nPizza com abacaxi?","nunca");
 
     private String question;
     private String answer;
