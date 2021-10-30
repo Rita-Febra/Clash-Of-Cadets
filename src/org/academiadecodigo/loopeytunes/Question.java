@@ -3,7 +3,7 @@ package org.academiadecodigo.loopeytunes;
 public class Question {
 
     private String question;
-    private String response;
+    private String answer;
     private String[] options;
 
 
@@ -11,23 +11,28 @@ public class Question {
     public Question(ListQuestions questionNumber){
 
         this.question = questionNumber.getQuestion();
-        this.response = questionNumber.getAnswer();
-        options = new String[]{response,"","",""};
+        this.answer = questionNumber.getAnswer();
+        options = new String[]{answer,"","",""};
     }
+
 
     public String[] getOptions() {
         return options;
     }
 
-    public void setOptions(String[] options) {
-        this.options = options;
-    }
-
-    public String getResponse() {
-        return response;
+    public String getAnswer() {
+        return answer;
     }
 
     public String getQuestion() {
         return question;
     }
+
+
+    public void setOptions(String[] options) {
+        this.options = options;
+    }
+
+    public void shuffleOptions(){}
+
 }

@@ -12,13 +12,16 @@ import java.net.Socket;
 
 public class Player implements Runnable {
 
-    private Question[] questions;
     private Socket playerSocket;
-    private int score;
-    private String name;
-    private Prompt prompt;
     private PrintWriter printWriter;
+    private Prompt prompt;
+
+    private Question[] questions;
     private String playerName;
+    private int score = 0;
+
+    private boolean gameOn;
+    private boolean choicesMade;
 
 
     public Player(Socket playerSocket, Question[] questions) {
@@ -34,31 +37,28 @@ public class Player implements Runnable {
 
     }
 
-    public void username() {
 
-        StringInputScanner username = new StringInputScanner();
-        username.setMessage("Username: ");
-
-        playerName = prompt.getUserInput(username);
-        printWriter.println("Welcome to Clash of Cadets " + playerName + "! \n" + "Good luck!");
-        printWriter.flush();
+    public boolean isGameOn(){
+        return gameOn;
     }
 
-    public void chooseAnswers(){
-        for (Question q : questions){
-            printWriter.println(q.getQuestion() + "\n 1: " + q.getResponse());
-            printWriter.flush();
-            String[] options = q.getOptions();
-            for (int i=0; i<3; i++){
-                StringInputScanner chooseAnswer = new StringInputScanner();
-                chooseAnswer.setMessage((i+2) + ": ");
-                options[i+1] = prompt.getUserInput(chooseAnswer);
-                System.out.println(options[i+1]);
-            }
-
-            q.setOptions(options);
-        }
+    public boolean choicesAreMade() {
+        return choicesMade;
     }
+
+    public void switchQuestions(Question[] questions) {
+        this.questions = questions;
+        gameOn = true;
+    }
+
+    public int getScore(){
+        return score;
+    }
+
+    public String getPlayerName(){
+        return playerName;
+    }
+
 
     public void menu() {
 
@@ -71,12 +71,66 @@ public class Player implements Runnable {
 
     }
 
+    private void username() {
+
+        StringInputScanner username = new StringInputScanner();
+        username.setMessage("Username: ");
+
+        playerName = prompt.getUserInput(username);
+        printWriter.println("Welcome to Clash of Cadets " + playerName + "! \n" + "Good luck! \n");
+        printWriter.flush();
+    }
+
+    private void chooseAnswers() {
+        for (Question q : questions) {
+            printWriter.println(q.getQuestion() + "\n 1: " + q.getAnswer());
+            printWriter.flush();
+            String[] options = q.getOptions();
+            for (int i = 0; i < 3; i++) {
+                StringInputScanner chooseAnswer = new StringInputScanner();
+                chooseAnswer.setMessage((i + 2) + ": ");
+                options[i + 1] = prompt.getUserInput(chooseAnswer);
+                System.out.println(options[i + 1]);
+            }
+
+            q.setOptions(options);
+        }
+    }
+
+    private void play() {
+        for (Question q : questions) {
+            MenuInputScanner scanner = new MenuInputScanner(q.getOptions());
+            scanner.setMessage(q.getQuestion());
+
+            int answerIndex = prompt.getUserInput(scanner);
+
+            if (q.getOptions()[answerIndex - 1].equals(q.getAnswer())) {
+                score += 20;
+                continue;
+            }
+            score -= 10;
+        }
+        System.out.println(score);
+        gameOn = false;
+    }
 
     @Override
     public void run() {
 
         username();
         chooseAnswers();
+        choicesMade = true;
+
+        // Thread.sleep
+        while (!gameOn) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                System.out.println(e.getMessage());
+            }
+        }
+
+        play();
 
 
     }

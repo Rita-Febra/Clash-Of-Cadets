@@ -17,10 +17,10 @@ public class Game implements Runnable {
         for (int i = 0; i < ListQuestions.values().length; i++) {
 
             if (i % 2 == 0) {
-                questionsP1[i/2] = new Question(ListQuestions.values()[i]);
+                questionsP1[i / 2] = new Question(ListQuestions.values()[i]);
                 continue;
             }
-            questionsP2[(i-1)/2] = new Question(ListQuestions.values()[i]);
+            questionsP2[(i - 1) / 2] = new Question(ListQuestions.values()[i]);
         }
 
         player1 = new Player(playerSocket1, questionsP1);
@@ -29,13 +29,51 @@ public class Game implements Runnable {
     }
 
 
-    @Override
-    public void run() {
-
+    public void startThreads() {
         threadPlayer1 = new Thread(player1);
         threadPlayer2 = new Thread(player2);
         threadPlayer1.start();
         threadPlayer2.start();
+    }
+
+    public void gameOver(){
+        if (player1.getScore() == player2.getScore()) {
+            System.out.println("It's a tie");
+            return;
+        }
+        Player winner = (player1.getScore() > player2.getScore() ? player1 : player2);
+
+        System.out.println(winner.getPlayerName());
+
+    }
+
+    @Override
+    public void run() {
+
+        startThreads();
+
+        //Thread.sleep
+        while (!(player1.choicesAreMade() && player2.choicesAreMade())) {
+            try {
+                Thread.sleep(1500);
+            } catch (InterruptedException e) {
+                System.out.println(e.getMessage());
+            }
+        }
+
+        player1.switchQuestions(questionsP2);
+        player2.switchQuestions(questionsP1);
+
+        //Thread.sleep
+        while (player1.isGameOn() || player2.isGameOn()) {
+            try {
+                Thread.sleep(1500);
+            } catch (InterruptedException e) {
+                System.out.println(e.getMessage());
+            }
+        }
+
+        gameOver();
 
     }
 }
