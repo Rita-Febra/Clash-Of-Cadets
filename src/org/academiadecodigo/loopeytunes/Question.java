@@ -11,7 +11,7 @@ public class Question {
 
         this.question = questionNumber.getQuestion();
         this.answer = questionNumber.getAnswer();
-        options = new String[]{answer, "", "", ""};
+        options = new String[]{answer, "", "", "","Joker"};
     }
 
     public String[] getOptions() {

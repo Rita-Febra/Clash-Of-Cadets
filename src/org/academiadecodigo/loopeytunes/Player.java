@@ -24,6 +24,7 @@ public class Player implements Runnable {
     private String playerName;
     private boolean gameOn;
     private boolean choicesMade;
+    private String[] jokers = {"50/50", "Phone", "Ask the audience"};
     private boolean completeAnswers;
 
 
@@ -40,6 +41,7 @@ public class Player implements Runnable {
 
     }
 
+
     public boolean isGameOn(){
         return gameOn;
     }
@@ -53,12 +55,23 @@ public class Player implements Runnable {
         gameOn = true;
     }
 
-    public int getScore(){
+    public int getScore() {
         return score;
     }
 
-    public String getPlayerName(){
+    public String getPlayerName() {
         return playerName;
+    }
+
+
+    public void menu() {
+
+        String[] options = {"Start", "Rules"};
+        MenuInputScanner scanner = new MenuInputScanner(options);
+        scanner.setMessage("Choose option: \n");
+
+        int answerIndex = prompt.getUserInput(scanner);
+
     }
 
     private void username() {
@@ -71,6 +84,7 @@ public class Player implements Runnable {
         printWriter.flush();
     }
 
+
     public void chooseAnswers() {
 
 
@@ -82,8 +96,15 @@ public class Player implements Runnable {
             printWriter.println(q.getQuestion() + "\n" + "1: " + q.getAnswer());
             printWriter.flush();
             String[] options = q.getOptions();
+            String[] optionsToShuffle = new String[options.length - 1];
 
-            List<String> optionsList = Arrays.asList(options);
+            //Exclusão do Joker
+            for (int i = 0; i < (options.length - 1); i++) {
+                optionsToShuffle[i] = options[i];
+            }
+
+
+            List<String> optionsList = Arrays.asList(optionsToShuffle);
 
             for (int i = 0; i < 3; i++) {
 
@@ -97,21 +118,57 @@ public class Player implements Runnable {
                     message = prompt.getUserInput(chooseAnswer);
 
                 }
-
-                q.setOptions(message, i + 1);
+                optionsToShuffle[i + 1] = message;
 
             }
 
             Collections.shuffle(optionsList);
-            optionsList.toArray(options);
+            optionsList.toArray(optionsToShuffle);
+            for (int i = 0; i < (options.length - 1); i++) {
+                q.setOptions(optionsToShuffle[i], i);
+            }
         }
-
         answersCompleted();
+
+        printWriter.println("\n---You've completed your answers---");
+        printWriter.flush();
 
     }
 
     public void answersCompleted() {
         completeAnswers = true;
+    }
+
+    private int jokerMenu(Question q) {
+        MenuInputScanner menuJoker = new MenuInputScanner(jokers);
+        menuJoker.setMessage("Choose your Joker");
+        int jokerIndex = prompt.getUserInput(menuJoker);
+
+        if (jokers[jokerIndex - 1].equals("50/50")) {
+
+            int deletedOptions = 0;
+            for (int i = 0; i < 4; i++) {
+                if (deletedOptions < 2) {
+                    if (!q.getOptions()[i].equals(q.getAnswer())) {
+                        q.setOptions("", i);
+                        deletedOptions++;
+                    }
+                }
+            }
+
+
+        }
+
+        jokers[jokerIndex - 1] = "";
+        q.getOptions()[q.getOptions().length - 1] = "";
+
+        //q.setOptions("",q.getOptions().length-1);
+
+        MenuInputScanner scanner = new MenuInputScanner(q.getOptions());
+        scanner.setMessage(q.getQuestion());
+
+        int answerIndex = prompt.getUserInput(scanner);
+        return answerIndex;
     }
 
     private void play() {
@@ -124,15 +181,31 @@ public class Player implements Runnable {
 
             int answerIndex = prompt.getUserInput(scanner);
 
-            if (q.getOptions()[answerIndex - 1].equals(q.getAnswer())) {
-                score += 20;
-                continue;
+
+            if (q.getOptions()[answerIndex - 1].equals("Joker")) {
+               answerIndex = jokerMenu(q);
             }
-            score -= 10;
+
+            if (q.getOptions()[answerIndex - 1].equals(q.getAnswer())) {
+                score += 10;
+                printWriter.println("\nCorrect Answer! 10 points for you.");
+                printWriter.flush();
+
+            }  else {
+
+                printWriter.println("\nWrong Answer! No points for you.");
+                printWriter.flush();
+            }
+
+            printWriter.println("\nYour current score is: " + getScore());
+            printWriter.flush();
         }
-        System.out.println(score);
+
+        printWriter.println("\nYour final score is: " + getScore());
+        printWriter.flush();
         gameOn = false;
     }
+
 
     @Override
     public void run() {
@@ -160,9 +233,29 @@ public class Player implements Runnable {
 
         play();
 
-
     }
 
+    public void wins() {
+        try {
+            printWriter = new PrintWriter(playerSocket.getOutputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        printWriter.println("\n## YOU HAVE WON THE GAME! CONGRATULATIONS ##\n");
+        printWriter.flush();
+    }
+
+    public void loses() {
+        try {
+            printWriter = new PrintWriter(playerSocket.getOutputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        printWriter.println("\n## SORRY BUT YOU HAVE LOST THE GAME, TRY AGAIN NEXT TIME ##\n");
+        printWriter.flush();
+    }
 
 }
 

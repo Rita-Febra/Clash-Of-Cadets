@@ -1,8 +1,6 @@
 package org.academiadecodigo.loopeytunes;
 
 import org.academiadecodigo.bootcamp.Prompt;
-import org.academiadecodigo.bootcamp.scanners.menu.MenuInputScanner;
-
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
