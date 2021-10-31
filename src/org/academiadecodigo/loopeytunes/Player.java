@@ -10,22 +10,23 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 
 public class Player implements Runnable {
 
-    private Question[] questions;
     private Socket playerSocket;
-    private int score = 0;
     private Prompt prompt;
     private PrintWriter printWriter;
+
+    private Question[] questions;
+    private String[] jokers = {"50/50", "Phone", "Ask the audience"};
+
     private String playerName;
+    private int score = 0;
+
     private boolean gameOn;
     private boolean choicesMade;
-    private String[] jokers = {"50/50", "Phone", "Ask the audience"};
-    private boolean completeAnswers;
 
 
     public Player(Socket playerSocket, Question[] questions) {
@@ -42,7 +43,8 @@ public class Player implements Runnable {
     }
 
 
-    public boolean isGameOn(){
+    // PUBLIC METHODS
+    public boolean isGameOn() {
         return gameOn;
     }
 
@@ -59,165 +61,11 @@ public class Player implements Runnable {
         return score;
     }
 
-    public String getPlayerName() {
-        return playerName;
-    }
-
-
-    public void menu() {
-
-        String[] options = {"Start", "Rules"};
-        MenuInputScanner scanner = new MenuInputScanner(options);
-        scanner.setMessage("Choose option: \n");
-
-        int answerIndex = prompt.getUserInput(scanner);
-
-    }
-
-    private void username() {
-
-        StringInputScanner username = new StringInputScanner();
-        username.setMessage("Choose your name: ");
-
-        playerName = prompt.getUserInput(username);
-        printWriter.println("\nWELCOME TO CLASH OF CADETS " + playerName +"! \n" + "GOOD LUCK! \n");
-        printWriter.flush();
-    }
-
-
-    public void chooseAnswers() {
-
-
-        printWriter.println("Choose your answers wisely: \n");
-        StringInputScanner chooseAnswer = new StringInputScanner();
-
-        for (Question q : questions) {
-
-            printWriter.println(q.getQuestion() + "\n" + "1: " + q.getAnswer());
-            printWriter.flush();
-            String[] options = q.getOptions();
-            String[] optionsToShuffle = new String[options.length - 1];
-
-            //Exclusão do Joker
-            for (int i = 0; i < (options.length - 1); i++) {
-                optionsToShuffle[i] = options[i];
-            }
-
-
-            List<String> optionsList = Arrays.asList(optionsToShuffle);
-
-            for (int i = 0; i < 3; i++) {
-
-                chooseAnswer.setMessage((i + 2) + ": ");
-                String message = (prompt.getUserInput(chooseAnswer));
-
-                while (optionsList.contains(message)) {
-
-                    printWriter.println("\nThis answer already exists. Please choose another one \n");
-                    printWriter.flush();
-                    message = prompt.getUserInput(chooseAnswer);
-
-                }
-                optionsToShuffle[i + 1] = message;
-
-            }
-
-            Collections.shuffle(optionsList);
-            optionsList.toArray(optionsToShuffle);
-            for (int i = 0; i < (options.length - 1); i++) {
-                q.setOptions(optionsToShuffle[i], i);
-            }
-        }
-        answersCompleted();
-
-        printWriter.println("\n---You've completed your answers---");
-        printWriter.flush();
-
-    }
-
-    public void answersCompleted() {
-        completeAnswers = true;
-    }
-
-    private int jokerMenu(Question q) {
-        MenuInputScanner menuJoker = new MenuInputScanner(jokers);
-        menuJoker.setMessage("Choose your Joker");
-        int jokerIndex = prompt.getUserInput(menuJoker);
-
-        if (jokers[jokerIndex - 1].equals("50/50")) {
-
-            int deletedOptions = 0;
-            for (int i = 0; i < 4; i++) {
-                if (deletedOptions < 2) {
-                    if (!q.getOptions()[i].equals(q.getAnswer())) {
-                        q.setOptions("", i);
-                        deletedOptions++;
-                    }
-                }
-            }
-
-
-        }
-
-        jokers[jokerIndex - 1] = "";
-        q.getOptions()[q.getOptions().length - 1] = "";
-
-        //q.setOptions("",q.getOptions().length-1);
-
-        MenuInputScanner scanner = new MenuInputScanner(q.getOptions());
-        scanner.setMessage(q.getQuestion());
-
-        int answerIndex = prompt.getUserInput(scanner);
-        return answerIndex;
-    }
-
-    private void play() {
-
-        printWriter.println("\n\n------READY-------\n\n-------SET--------\n\n--------GO--------\n");
-        printWriter.flush();
-        for (Question q : questions) {
-            MenuInputScanner scanner = new MenuInputScanner(q.getOptions());
-            scanner.setMessage(q.getQuestion());
-
-            int answerIndex = prompt.getUserInput(scanner);
-
-
-            if (q.getOptions()[answerIndex - 1].equals("Joker")) {
-               answerIndex = jokerMenu(q);
-            }
-
-            if (q.getOptions()[answerIndex - 1].equals(q.getAnswer())) {
-                score += 10;
-                printWriter.println("\nCorrect Answer! 10 points for you.");
-                printWriter.flush();
-
-            }  else {
-
-                printWriter.println("\nWrong Answer! No points for you.");
-                printWriter.flush();
-            }
-
-            printWriter.println("\nYour current score is: " + getScore());
-            printWriter.flush();
-        }
-
-        printWriter.println("\nYour final score is: " + getScore());
-        printWriter.flush();
-        gameOn = false;
-    }
 
 
     @Override
     public void run() {
-        String[] options = {"Start"};
-        MenuInputScanner scanner = new MenuInputScanner(options);
-        scanner.setMessage("PRESS 1 TO START... \n");
-
-        int answerIndex = prompt.getUserInput(scanner);
-        if (answerIndex == 1) {
-            printWriter.println("GAME ON!\n");
-            printWriter.flush();
-        }
+        menu();
         username();
         chooseAnswers();
         choicesMade = true;
@@ -235,6 +83,157 @@ public class Player implements Runnable {
 
     }
 
+
+
+    // RUN METHODS
+    private void menu() {
+        String[] options = {"Start"};
+        MenuInputScanner scanner = new MenuInputScanner(options);
+        scanner.setMessage("PRESS 1 TO START... \n");
+
+        int answerIndex = prompt.getUserInput(scanner);
+        if (answerIndex == 1) {
+            printWriter.println("GAME ON!\n");
+            printWriter.flush();
+        }
+    }
+
+    private void username() {
+
+        StringInputScanner username = new StringInputScanner();
+        username.setMessage("Choose your name: ");
+
+        playerName = prompt.getUserInput(username);
+        printWriter.println("\nWELCOME TO CLASH OF CADETS " + playerName + "! \n" + "GOOD LUCK! \n");
+        printWriter.flush();
+    }
+
+    private void chooseAnswers() {
+
+        StringInputScanner scanner = new StringInputScanner();
+
+        printWriter.println("Choose your answers wisely: \n");
+        for (Question q : questions) {
+
+            printWriter.println(q.getQuestion() + "\n" + "1: " + q.getAnswer());
+            printWriter.flush();
+
+            // INPUT ANSWERS 2, 3 AND 4
+            for (int i = 2; i <= 4; i++) {
+
+                scanner.setMessage(i + ": ");
+                String message = (prompt.getUserInput(scanner));
+
+                message = checkRepetition(message, scanner, q);
+
+                q.setOption(true, message, i - 1);
+            }
+            q.shuffleAnswers();
+        }
+
+        printWriter.println("\n---You've completed your answers---");
+        printWriter.flush();
+
+    }
+
+    private String checkRepetition(String message, StringInputScanner scanner, Question q) {
+
+        List<String> optionsList = Arrays.asList(q.getOptionsToShuffle());
+
+        while (optionsList.contains(message)) {
+            printWriter.println("\nThis answer already exists. Please choose another one \n");
+            printWriter.flush();
+            message = prompt.getUserInput(scanner);
+
+        }
+        return message;
+    }
+
+    private void play() {
+
+        printWriter.println("\n\n------READY-------\n\n-------SET--------\n\n--------GO--------\n");
+        printWriter.flush();
+
+
+        for (Question q : questions) {
+
+            MenuInputScanner scanner = new MenuInputScanner(q.getOptions());
+            scanner.setMessage(q.getQuestion());
+
+            int answerIndex = prompt.getUserInput(scanner);
+
+            if (q.getOptions()[answerIndex - 1].equals("Joker")) {
+                answerIndex = jokerMenu(q);
+            }
+
+            updateScore(q, answerIndex);
+        }
+
+        printWriter.println("\nYour final score is: " + getScore());
+        printWriter.flush();
+        gameOn = false;
+    }
+
+    private int jokerMenu(Question q) {
+
+        MenuInputScanner menuJoker = new MenuInputScanner(jokers);
+        menuJoker.setMessage("Choose your Joker");
+        int chosenIndex = prompt.getUserInput(menuJoker);
+
+        if (jokers[chosenIndex - 1].equals("50/50")) {
+            useFiftyFifty(q);
+        }
+
+        // DELETE CHOSEN JOKER
+        jokers[chosenIndex - 1] = "";
+
+        // DELETE JOKER OPTION
+        q.setOption(false, "", q.getOptions().length - 1);
+
+        //REPEAT QUESTION
+        MenuInputScanner scanner = new MenuInputScanner(q.getOptions());
+        scanner.setMessage(q.getQuestion());
+
+        int answerIndex = prompt.getUserInput(scanner);
+        return answerIndex;
+    }
+
+    private void useFiftyFifty(Question q) {
+
+        int deletedOptions = 0;
+
+        for (int i = 0; i < q.getOptions().length; i++) {
+
+            if (q.getOptions()[i].equals(q.getAnswer())) {
+                continue;
+            }
+
+            if (deletedOptions < 2) {
+                q.setOption(false, "", i);
+                deletedOptions++;
+            }
+        }
+    }
+
+    private void updateScore(Question q, int answerIndex) {
+
+        if (q.getOptions()[answerIndex - 1].equals(q.getAnswer())) {
+            score += 10;
+            printWriter.println("\nCorrect Answer! 10 points for you.");
+            printWriter.flush();
+
+        } else {
+            printWriter.println("\nWrong Answer! No points for you.");
+            printWriter.flush();
+        }
+
+        printWriter.println("\nYour current score is: " + getScore());
+        printWriter.flush();
+    }
+
+
+
+    // GAME OVER
     public void wins() {
         try {
             printWriter = new PrintWriter(playerSocket.getOutputStream());
