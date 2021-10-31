@@ -2,30 +2,71 @@ package org.academiadecodigo.loopeytunes;
 
 
 import java.net.Socket;
+import java.util.LinkedList;
 
 public class Game implements Runnable {
 
-    private Question[] questionsP1 = new Question[ListQuestions.values().length / 2];
-    private Question[] questionsP2 = new Question[ListQuestions.values().length / 2];
+
+    private LinkedList<Question> allQuestions = new LinkedList<>();
+    private Question[] questionsP1 = new Question[5];
+    private Question[] questionsP2 = new Question[5];
     private Player player1;
     private Player player2;
     private Thread threadPlayer1;
     private Thread threadPlayer2;
 
+
     public Game(Socket playerSocket1, Socket playerSocket2) {
 
-        for (int i = 0; i < ListQuestions.values().length; i++) {
-
-            if (i % 2 == 0) {
-                questionsP1[i / 2] = new Question(ListQuestions.values()[i]);
-                continue;
-            }
-            questionsP2[(i - 1) / 2] = new Question(ListQuestions.values()[i]);
-        }
-
+        randomAllQuestions();
+        playersQuestions();
         player1 = new Player(playerSocket1, questionsP1);
         player2 = new Player(playerSocket2, questionsP2);
 
+    }
+
+    public void randomAllQuestions(){
+        int i = 0;
+        while (i < 10) {
+            if (allQuestions.isEmpty()) {
+                allQuestions.add(new Question(ListQuestions.values()[(int) Math.floor(Math.random() * ListQuestions.values().length)]));
+                i++;
+                continue;
+            }
+            Question question = new Question(ListQuestions.values()[(int) Math.floor(Math.random() * ListQuestions.values().length)]);
+            boolean hasQuestion = false;
+
+            for (Question q : allQuestions) {
+
+                if (q.getQuestion() == question.getQuestion()) {
+                    hasQuestion = true;
+                }
+            }
+            if (hasQuestion) {
+                continue;
+            }
+            allQuestions.add(question);
+            i++;
+
+        }
+        System.out.println(allQuestions.size());
+    }
+
+    public void playersQuestions(){
+        for (int j = 0; j < allQuestions.size(); j++) {
+
+            System.out.println(allQuestions.get(j).getQuestion());
+
+            if (j % 2 == 0) {
+
+                questionsP1[j / 2] = allQuestions.get(j);
+
+
+            } else {
+
+                questionsP2[(j - 1) / 2] = allQuestions.get(j);
+            }
+        }
     }
 
 
@@ -36,7 +77,7 @@ public class Game implements Runnable {
         threadPlayer2.start();
     }
 
-    public void gameOver(){
+    public void gameOver() {
         if (player1.getScore() == player2.getScore()) {
             System.out.println("It's a tie");
             return;
