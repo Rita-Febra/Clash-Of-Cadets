@@ -1,11 +1,14 @@
 package org.academiadecodigo.loopeytunes;
 
 import org.academiadecodigo.bootcamp.Prompt;
+
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Server {
 
@@ -25,37 +28,39 @@ public class Server {
             serverSocket = new ServerSocket(serverPort);
 
             while (!serverSocket.isClosed()) {
+                if (message != null) {
+                    if (numConnect == 2) {
+                        Game game = new Game(sockets[0], sockets[1]);
+                        ExecutorService fixedPool = Executors.newFixedThreadPool(4);
+                        fixedPool.submit(game);
+                        numConnect = 0;
+                    }
 
-                if (numConnect == 2) {
-                    Game game = new Game(sockets[0], sockets[1]);
-                    Thread thread = new Thread(game);
-                    thread.start();
-                    numConnect = 0;
-                }
+                    System.out.println("Waiting for player...");
+                    clientSocket = serverSocket.accept();
+                    System.out.println("You connected to game server!");
 
-                System.out.println("Waiting for player...");
-                clientSocket = serverSocket.accept();
-                System.out.println("You connected to game server!");
+                    if (numConnect < 2) {
+                        sockets[numConnect] = clientSocket;
+                        message[numConnect] = new PrintWriter(clientSocket.getOutputStream(), true);
+                        prompt[numConnect] = new Prompt(clientSocket.getInputStream(), new PrintStream(clientSocket.getOutputStream()));
+                        message[numConnect].println("You connected to game server");
+                        title();
+                        message[numConnect].flush();
+                        numConnect++;
 
-                if (numConnect < 2) {
-                    sockets[numConnect] = clientSocket;
-                    message[numConnect] = new PrintWriter(clientSocket.getOutputStream(), true);
-                    prompt[numConnect] = new Prompt(clientSocket.getInputStream(), new PrintStream(clientSocket.getOutputStream()));
-                    message[numConnect].println("You connected to game server");
-                    title();
-                    message[numConnect].flush();
-                    numConnect++;
-
+                    }
                 }
             }
 
         } catch (IOException e) {
             e.printStackTrace();
+            System.out.println("estou aqui");
         }
     }
 
     public void title() {
-        message[numConnect].println("\n"+
+        message[numConnect].println("\n" +
                 "       ___   _        _     ___   _  _    \n" +
                 "      / __| | |      /_\\   / __| | || |   \n" +
                 "     | (__  | |__   / _ \\  \\__ \\ | __ |   \n" +

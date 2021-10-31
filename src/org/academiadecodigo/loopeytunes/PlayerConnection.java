@@ -13,8 +13,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-
-public class Player implements Runnable {
+public class PlayerConnection implements Runnable {
 
     private Question[] questions;
     private Socket playerSocket;
@@ -27,8 +26,7 @@ public class Player implements Runnable {
     private String[] jokers = {"50/50", "Phone", "Ask the audience"};
     private boolean completeAnswers;
 
-
-    public Player(Socket playerSocket, Question[] questions) {
+    public PlayerConnection(Socket playerSocket, Question[] questions) {
 
         this.playerSocket = playerSocket;
         this.questions = questions;
@@ -66,11 +64,15 @@ public class Player implements Runnable {
 
     public void menu() {
 
-        String[] options = {"Start", "Rules"};
+        String[] options = {"Start"};
         MenuInputScanner scanner = new MenuInputScanner(options);
-        scanner.setMessage("Choose option: \n");
+        scanner.setMessage("PRESS 1 TO START... \n");
 
         int answerIndex = prompt.getUserInput(scanner);
+        if (answerIndex == 1) {
+            printWriter.println("GAME ON!\n");
+            printWriter.flush();
+        }
 
     }
 
@@ -213,34 +215,6 @@ public class Player implements Runnable {
     }
 
 
-    @Override
-    public void run() {
-        String[] options = {"Start"};
-        MenuInputScanner scanner = new MenuInputScanner(options);
-        scanner.setMessage("PRESS 1 TO START... \n");
-
-        int answerIndex = prompt.getUserInput(scanner);
-        if (answerIndex == 1) {
-            printWriter.println("GAME ON!\n");
-            printWriter.flush();
-        }
-        username();
-        chooseAnswers();
-        choicesMade = true;
-
-        // Thread.sleep
-        while (!gameOn) {
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                System.out.println(e.getMessage());
-            }
-        }
-
-        play();
-
-    }
-
     public void wins() {
         try {
             printWriter = new PrintWriter(playerSocket.getOutputStream());
@@ -260,6 +234,34 @@ public class Player implements Runnable {
         }
 
         printWriter.println("\n## SORRY BUT YOU HAVE LOST THE GAME, TRY AGAIN NEXT TIME ##\n");
+        printWriter.flush();
+    }
+    @Override
+    public void run() {
+        menu();
+        username();
+        chooseAnswers();
+        choicesMade = true;
+
+        // Thread.sleep
+        while (!gameOn) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                System.out.println(e.getMessage());
+            }
+        }
+
+        play();
+
+    }
+    public void tie() {
+        try {
+            printWriter = new PrintWriter(playerSocket.getOutputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        printWriter.println("\n## IT'S A TIE ##\n");
         printWriter.flush();
     }
 

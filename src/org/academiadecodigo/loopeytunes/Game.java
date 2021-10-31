@@ -12,12 +12,10 @@ public class Game implements Runnable {
     private LinkedList<Question> allQuestions = new LinkedList<>();
     private Question[] questionsP1 = new Question[5];
     private Question[] questionsP2 = new Question[5];
-    private Player player1;
-    private Player player2;
+    private PlayerConnection player1;
+    private PlayerConnection player2;
     private Thread threadPlayer1;
     private Thread threadPlayer2;
-    private PrintWriter printWriter;
-
 
 
 
@@ -27,13 +25,14 @@ public class Game implements Runnable {
 
         randomAllQuestions();
         playersQuestions();
-        player1 = new Player(playerSocket1, questionsP1);
-        player2 = new Player(playerSocket2, questionsP2);
+        player1 = new PlayerConnection(playerSocket1, questionsP1);
+        player2 = new PlayerConnection(playerSocket2, questionsP2);
 
     }
 
+    // Creating a List of questions
+    public void randomAllQuestions() {
 
-    public void randomAllQuestions(){
         int i = 0;
         while (i < 10) {
             if (allQuestions.isEmpty()) {
@@ -44,6 +43,7 @@ public class Game implements Runnable {
             Question question = new Question(ListQuestions.values()[(int) Math.floor(Math.random() * ListQuestions.values().length)]);
             boolean hasQuestion = false;
 
+            // Checking if question already exists in the list, if not, add
             for (Question q : allQuestions) {
 
                 if (q.getQuestion() == question.getQuestion()) {
@@ -60,7 +60,9 @@ public class Game implements Runnable {
         System.out.println(allQuestions.size());
     }
 
-    public void playersQuestions(){
+    // Giving players questions
+    public void playersQuestions() {
+
         for (int j = 0; j < allQuestions.size(); j++) {
 
             System.out.println(allQuestions.get(j).getQuestion());
@@ -78,6 +80,7 @@ public class Game implements Runnable {
     }
 
     public void startThreads() {
+
         threadPlayer1 = new Thread(player1);
         threadPlayer2 = new Thread(player2);
         threadPlayer1.start();
@@ -87,13 +90,13 @@ public class Game implements Runnable {
     public void gameOver() {
 
         if (player1.getScore() == player2.getScore()) {
-            printWriter.println("\n ## IT'S A TIE!");
-            printWriter.flush();
+            player1.tie();
+            player2.tie();
             return;
         }
 
-        Player winner = (player1.getScore() > player2.getScore() ? player1 : player2);
-        Player looser = (player1.getScore() < player2.getScore() ? player1 : player2);
+        PlayerConnection winner = (player1.getScore() > player2.getScore() ? player1 : player2);
+        PlayerConnection looser = (player1.getScore() < player2.getScore() ? player1 : player2);
 
         winner.wins();
         looser.loses();
@@ -105,7 +108,6 @@ public class Game implements Runnable {
 
         startThreads();
 
-        //Thread.sleep
         while (!(player1.choicesAreMade() && player2.choicesAreMade())) {
             try {
                 Thread.sleep(1500);
@@ -117,7 +119,6 @@ public class Game implements Runnable {
         player1.switchQuestions(questionsP2);
         player2.switchQuestions(questionsP1);
 
-        //Thread.sleep
         while (player1.isGameOn() || player2.isGameOn()) {
             try {
                 Thread.sleep(1500);
