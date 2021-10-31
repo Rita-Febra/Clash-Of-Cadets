@@ -83,7 +83,7 @@ public class Player implements Runnable {
         username.setMessage("Username: ");
 
         playerName = prompt.getUserInput(username);
-        printWriter.println("Welcome to Clash of Cadets " + playerName + "! \n" + "Good luck! \n");
+        printWriter.println("\nWelcome to Clash of Cadets " + playerName + "! \n" + "Good luck! \n");
         printWriter.flush();
     }
 
@@ -188,12 +188,22 @@ public class Player implements Runnable {
             }
 
             if (q.getOptions()[answerIndex - 1].equals(q.getAnswer())) {
-                score += 20;
-                continue;
+                score += 10;
+                printWriter.println("\nCorrect Answer! 10 points for you.");
+                printWriter.flush();
+
+            }  else {
+
+                printWriter.println("\nWrong Answer! No points for you.");
+                printWriter.flush();
             }
-            score -= 10;
+
+            printWriter.println("\nYour current score is: " + getScore());
+            printWriter.flush();
         }
-        System.out.println(score);
+
+        printWriter.println("\nYour final score is: " + getScore());
+        printWriter.flush();
         gameOn = false;
     }
 
@@ -216,9 +226,29 @@ public class Player implements Runnable {
 
         play();
 
-
     }
 
+    public void wins() {
+        try {
+            printWriter = new PrintWriter(playerSocket.getOutputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        printWriter.println("\n## YOU HAVE WON THE GAME! CONGRATULATIONS ##\n");
+        printWriter.flush();
+    }
+
+    public void loses() {
+        try {
+            printWriter = new PrintWriter(playerSocket.getOutputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        printWriter.println("\n## SORRY BUT YOU HAVE LOST THE GAME, TRY AGAIN NEXT TIME ##\n");
+        printWriter.flush();
+    }
 
 }
 
