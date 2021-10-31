@@ -171,6 +171,8 @@ public class Player implements Runnable {
         return answerIndex;
     }
 
+
+
     private void play() {
 
         printWriter.println("\n\n------READY-------\n\n-------SET--------\n\n--------GO--------\n");
@@ -204,6 +206,10 @@ public class Player implements Runnable {
         printWriter.println("\nYour final score is: " + getScore());
         printWriter.flush();
         gameOn = false;
+    }
+
+    public Socket getSocket(){
+        return playerSocket;
     }
 
 

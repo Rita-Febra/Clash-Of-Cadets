@@ -1,6 +1,7 @@
 package org.academiadecodigo.loopeytunes;
 
 
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.LinkedList;
@@ -15,10 +16,14 @@ public class Game implements Runnable {
     private Player player2;
     private Thread threadPlayer1;
     private Thread threadPlayer2;
-    PrintWriter printWriter;
+    private PrintWriter printWriter;
+
+
 
 
     public Game(Socket playerSocket1, Socket playerSocket2) {
+
+
 
         randomAllQuestions();
         playersQuestions();
@@ -80,6 +85,7 @@ public class Game implements Runnable {
     }
 
     public void gameOver() {
+
         if (player1.getScore() == player2.getScore()) {
             printWriter.println("\n ## IT'S A TIE!");
             printWriter.flush();
