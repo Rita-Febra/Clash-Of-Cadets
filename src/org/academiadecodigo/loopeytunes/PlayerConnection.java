@@ -1,8 +1,10 @@
 package org.academiadecodigo.loopeytunes;
 
+
 import org.academiadecodigo.bootcamp.Prompt;
 import org.academiadecodigo.bootcamp.scanners.menu.MenuInputScanner;
 import org.academiadecodigo.bootcamp.scanners.string.StringInputScanner;
+
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
@@ -37,9 +39,6 @@ public class PlayerConnection implements Runnable {
 
     }
 
-    public Socket getPlayerSocket() {
-        return playerSocket;
-    }
 
     public boolean isGameOn(){
         return gameOn;
@@ -57,6 +56,11 @@ public class PlayerConnection implements Runnable {
     public int getScore() {
         return score;
     }
+
+    public String getPlayerName() {
+        return playerName;
+    }
+
 
     public void menu() {
 
@@ -81,6 +85,7 @@ public class PlayerConnection implements Runnable {
         printWriter.println("\nWELCOME TO CLASH OF CADETS " + playerName +"! \n" + "GOOD LUCK! \n");
         printWriter.flush();
     }
+
 
     public void chooseAnswers() {
 
@@ -152,6 +157,8 @@ public class PlayerConnection implements Runnable {
                     }
                 }
             }
+
+
         }
 
         jokers[jokerIndex - 1] = "";
@@ -201,6 +208,7 @@ public class PlayerConnection implements Runnable {
         gameOn = false;
     }
 
+
     public void wins() {
         try {
             printWriter = new PrintWriter(playerSocket.getOutputStream());
@@ -241,6 +249,16 @@ public class PlayerConnection implements Runnable {
         play();
 
     }
+    public void tie() {
+        try {
+            printWriter = new PrintWriter(playerSocket.getOutputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        printWriter.println("\n## IT'S A TIE ##\n");
+        printWriter.flush();
+    }
+
 }
 
 
