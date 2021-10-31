@@ -1,6 +1,7 @@
 package org.academiadecodigo.loopeytunes;
 
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.LinkedList;
@@ -11,24 +12,23 @@ public class Game implements Runnable {
     private LinkedList<Question> allQuestions = new LinkedList<>();
     private Question[] questionsP1 = new Question[5];
     private Question[] questionsP2 = new Question[5];
-    private Player player1;
-    private Player player2;
+    private PlayerConnection playerConnection1;
+    private PlayerConnection playerConnection2;
     private Thread threadPlayer1;
     private Thread threadPlayer2;
-    PrintWriter printWriter;
-
+    private PrintWriter printWriterP1;
+    private PrintWriter printWriterP2;
 
     public Game(Socket playerSocket1, Socket playerSocket2) {
 
         randomAllQuestions();
         playersQuestions();
-        player1 = new Player(playerSocket1, questionsP1);
-        player2 = new Player(playerSocket2, questionsP2);
+        playerConnection1 = new PlayerConnection(playerSocket1, questionsP1);
+        playerConnection2 = new PlayerConnection(playerSocket2, questionsP2);
 
     }
 
-
-    public void randomAllQuestions(){
+    public void randomAllQuestions() {
         int i = 0;
         while (i < 10) {
             if (allQuestions.isEmpty()) {
@@ -41,7 +41,7 @@ public class Game implements Runnable {
 
             for (Question q : allQuestions) {
 
-                if (q.getQuestion() == question.getQuestion()) {
+                if (q.getQuestion().equals(question.getQuestion())) {
                     hasQuestion = true;
                 }
             }
@@ -55,7 +55,7 @@ public class Game implements Runnable {
         System.out.println(allQuestions.size());
     }
 
-    public void playersQuestions(){
+    public void playersQuestions() {
         for (int j = 0; j < allQuestions.size(); j++) {
 
             System.out.println(allQuestions.get(j).getQuestion());
@@ -73,21 +73,29 @@ public class Game implements Runnable {
     }
 
     public void startThreads() {
-        threadPlayer1 = new Thread(player1);
-        threadPlayer2 = new Thread(player2);
+        threadPlayer1 = new Thread(playerConnection1);
+        threadPlayer2 = new Thread(playerConnection2);
         threadPlayer1.start();
         threadPlayer2.start();
     }
 
     public void gameOver() {
-        if (player1.getScore() == player2.getScore()) {
-            printWriter.println("\n ## IT'S A TIE!");
-            printWriter.flush();
+        try {
+            printWriterP1 = new PrintWriter(playerConnection1.getPlayerSocket().getOutputStream());
+            printWriterP2 = new PrintWriter(playerConnection2.getPlayerSocket().getOutputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (playerConnection1.getScore() == playerConnection2.getScore()) {
+            printWriterP1.println("\n ## IT'S A TIE!");
+            printWriterP1.flush();
+            printWriterP2.println("\n ## IT'S A TIE!");
+            printWriterP2.flush();
             return;
         }
 
-        Player winner = (player1.getScore() > player2.getScore() ? player1 : player2);
-        Player looser = (player1.getScore() < player2.getScore() ? player1 : player2);
+        PlayerConnection winner = (playerConnection1.getScore() > playerConnection2.getScore() ? playerConnection1 : playerConnection2);
+        PlayerConnection looser = (playerConnection1.getScore() < playerConnection2.getScore() ? playerConnection1 : playerConnection2);
 
         winner.wins();
         looser.loses();
@@ -100,7 +108,7 @@ public class Game implements Runnable {
         startThreads();
 
         //Thread.sleep
-        while (!(player1.choicesAreMade() && player2.choicesAreMade())) {
+        while (!(playerConnection1.choicesAreMade() && playerConnection2.choicesAreMade())) {
             try {
                 Thread.sleep(1500);
             } catch (InterruptedException e) {
@@ -108,11 +116,11 @@ public class Game implements Runnable {
             }
         }
 
-        player1.switchQuestions(questionsP2);
-        player2.switchQuestions(questionsP1);
+        playerConnection1.switchQuestions(questionsP2);
+        playerConnection2.switchQuestions(questionsP1);
 
         //Thread.sleep
-        while (player1.isGameOn() || player2.isGameOn()) {
+        while (playerConnection1.isGameOn() || playerConnection2.isGameOn()) {
             try {
                 Thread.sleep(1500);
             } catch (InterruptedException e) {
