@@ -10,10 +10,10 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
-
-public class Player implements Runnable {
+public class PlayerConnection implements Runnable {
 
     private Socket playerSocket;
     private Prompt prompt;
@@ -28,8 +28,7 @@ public class Player implements Runnable {
     private boolean gameOn;
     private boolean choicesMade;
 
-
-    public Player(Socket playerSocket, Question[] questions) {
+    public PlayerConnection(Socket playerSocket, Question[] questions) {
 
         this.playerSocket = playerSocket;
         this.questions = questions;
@@ -62,7 +61,6 @@ public class Player implements Runnable {
     }
 
 
-
     @Override
     public void run() {
         menu();
@@ -84,7 +82,6 @@ public class Player implements Runnable {
     }
 
 
-
     // RUN METHODS
     private void menu() {
         String[] options = {"Start"};
@@ -96,6 +93,7 @@ public class Player implements Runnable {
             printWriter.println("GAME ON!\n");
             printWriter.flush();
         }
+
     }
 
     private void username() {
@@ -232,27 +230,19 @@ public class Player implements Runnable {
     }
 
 
-
     // GAME OVER
     public void wins() {
-        try {
-            printWriter = new PrintWriter(playerSocket.getOutputStream());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
         printWriter.println("\n## YOU HAVE WON THE GAME! CONGRATULATIONS ##\n");
         printWriter.flush();
     }
 
     public void loses() {
-        try {
-            printWriter = new PrintWriter(playerSocket.getOutputStream());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
         printWriter.println("\n## SORRY BUT YOU HAVE LOST THE GAME, TRY AGAIN NEXT TIME ##\n");
+        printWriter.flush();
+    }
+
+    public void tie() {
+        printWriter.println("\n## IT'S A TIE ##\n");
         printWriter.flush();
     }
 
