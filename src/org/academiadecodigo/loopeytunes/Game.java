@@ -1,14 +1,13 @@
 package org.academiadecodigo.loopeytunes;
 
-
-import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.LinkedList;
 
 public class Game implements Runnable {
 
+    private final int numberOfQuestions = 10;
 
-    private LinkedList<Question> allQuestions = new LinkedList<>();
+    private LinkedList<Question> allQuestions;
     private Question[] questionsP1 = new Question[5];
     private Question[] questionsP2 = new Question[5];
     private PlayerConnection player1;
@@ -16,44 +15,13 @@ public class Game implements Runnable {
     private Thread threadPlayer1;
     private Thread threadPlayer2;
 
-
     public Game(Socket playerSocket1, Socket playerSocket2) {
 
-        randomAllQuestions();
+        allQuestions = QuestionsFactory.makeListOfQuestions(numberOfQuestions);
         playersQuestions();
         player1 = new PlayerConnection(playerSocket1, questionsP1);
         player2 = new PlayerConnection(playerSocket2, questionsP2);
 
-    }
-
-    // Creating a List of questions
-    public void randomAllQuestions() {
-
-        int i = 0;
-        while (i < 10) {
-            if (allQuestions.isEmpty()) {
-                allQuestions.add(new Question(ListQuestions.values()[(int) Math.floor(Math.random() * ListQuestions.values().length)]));
-                i++;
-                continue;
-            }
-            Question question = new Question(ListQuestions.values()[(int) Math.floor(Math.random() * ListQuestions.values().length)]);
-            boolean hasQuestion = false;
-
-            // Checking if question already exists in the list, if not, add
-            for (Question q : allQuestions) {
-
-                if (q.getQuestion() == question.getQuestion()) {
-                    hasQuestion = true;
-                }
-            }
-            if (hasQuestion) {
-                continue;
-            }
-            allQuestions.add(question);
-            i++;
-
-        }
-        System.out.println(allQuestions.size());
     }
 
     // Giving players questions
@@ -61,17 +29,12 @@ public class Game implements Runnable {
 
         for (int j = 0; j < allQuestions.size(); j++) {
 
-            System.out.println(allQuestions.get(j).getQuestion());
-
             if (j % 2 == 0) {
-
                 questionsP1[j / 2] = allQuestions.get(j);
-
-
-            } else {
-
-                questionsP2[(j - 1) / 2] = allQuestions.get(j);
+                continue;
             }
+            questionsP2[(j - 1) / 2] = allQuestions.get(j);
+
         }
     }
 

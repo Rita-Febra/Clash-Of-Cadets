@@ -20,7 +20,6 @@ public class Server {
     private PrintWriter[] message = new PrintWriter[3];
     private Prompt[] prompt = new Prompt[2];
 
-
     public Server() {
 
         try {
