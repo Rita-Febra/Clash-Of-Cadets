@@ -86,7 +86,6 @@ public class PlayerConnection implements Runnable {
         printWriter.flush();
     }
 
-
     public void chooseAnswers() {
 
 
@@ -208,7 +207,6 @@ public class PlayerConnection implements Runnable {
         gameOn = false;
     }
 
-
     public void wins() {
         try {
             printWriter = new PrintWriter(playerSocket.getOutputStream());
@@ -230,6 +228,16 @@ public class PlayerConnection implements Runnable {
         printWriter.println("\n## SORRY BUT YOU HAVE LOST THE GAME, TRY AGAIN NEXT TIME ##\n");
         printWriter.flush();
     }
+
+    public void tie() {
+        try {
+            printWriter = new PrintWriter(playerSocket.getOutputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        printWriter.println("\n## IT'S A TIE ##\n");
+        printWriter.flush();
+    }
     @Override
     public void run() {
         menu();
@@ -249,15 +257,7 @@ public class PlayerConnection implements Runnable {
         play();
 
     }
-    public void tie() {
-        try {
-            printWriter = new PrintWriter(playerSocket.getOutputStream());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        printWriter.println("\n## IT'S A TIE ##\n");
-        printWriter.flush();
-    }
+
 
 }
 
